@@ -131,7 +131,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            "${{ env.ZIP_NAME }}".zip
+            "${{ env.ZIP_NAME }}"
           name: ${{ github.event.inputs.KERNEL_NAME }} // ${{ env.RELEASE_DATE }}
           tag_name: ${{ github.run_id }}
           body: |
