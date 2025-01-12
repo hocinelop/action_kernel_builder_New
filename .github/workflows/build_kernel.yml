@@ -104,7 +104,7 @@ jobs:
             LD=ld.lld \
             NM=llvm-nm \
             LLVM=1 \
-            LLVM_IAS=1
+            LLVM_IAS=1 \
             DTC_EXT=dtc Image.gz dtbo.img dtb.img
          }
 
