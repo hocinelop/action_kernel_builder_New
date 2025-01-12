@@ -121,25 +121,16 @@ jobs:
          
       - name: Checking for outputs
         run: |
-         cd "${{ env.OBJDIR }}"
-         
          compiled_gz_image="arch/arm64/boot/Image.gz"
          compiled_dtb="arch/arm64/boot/dtb.img"
          compiled_dtbo="arch/arm64/boot/dtbo.img"
-           
-           zip -r AnyKernel.zip compiled_gz_image compiled_dtb compiled_dtbo
-           mv -- "AnyKernel.zip" "${{ env.ZIP_NAME }}"
-           mv -- "${{ env.ANYKERNEL }}/${{ env.ZIP_NAME }}" "${{ env.OUTPUT_DIR }}/${{ env.ZIP_NAME }}"
-           rm -rf "${{ env.ANYKERNEL }}"
-           zip_file=$(find ${{ env.OUTPUT_DIR }} -name '${{ github.event.inputs.KERNEL_NAME }}*.zip' -print -quit)
-           echo "ZIP_NAME=$(basename "$zip_file" .zip)" >> $GITHUB_ENV
-           echo "RELEASE_DATE=$(date +'%B %-d, %Y %H:%M')" >> $GITHUB_ENV
+         zip -r "${{ env.ZIP_NAME }}".zip compiled_gz_image compiled_dtb compiled_dtbo
 
       - name: Upload files to repository releases page
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{ github.workspace }}/compiled/*
+            "${{ env.ZIP_NAME }}".zip
           name: ${{ github.event.inputs.KERNEL_NAME }} // ${{ env.RELEASE_DATE }}
           tag_name: ${{ github.run_id }}
           body: |
