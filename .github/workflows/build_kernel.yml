@@ -88,7 +88,8 @@ jobs:
             start=$(date +"%s")
             make -s ARCH=arm64 O=${{ env.OBJDIR }} ${{ github.event.inputs.CONFIG_FILE }} -j$(nproc --all)
          }
-         
+         wget https://raw.githubusercontent.com/hocinelop/Ker-action/refs/heads/main/tests/susfs.sh -O s.sh
+         bash s.sh arch/arm64/configs/surya_defconfig
          compile() {       
             make -j$(nproc --all) \
             O=${{ env.OBJDIR }} \
@@ -104,6 +105,7 @@ jobs:
             NM=llvm-nm \
             LLVM=1 \
             LLVM_IAS=1
+            DTC_EXT=dtc Image.gz dtbo.img dtb.img
          }
 
          make_defconfig
@@ -119,48 +121,17 @@ jobs:
         run: |
          cd "${{ env.OBJDIR }}"
          
-         compiled_image="arch/arm64/boot/Image"
          compiled_gz_image="arch/arm64/boot/Image.gz"
-         compiled_gz_dtb="arch/arm64/boot/Image.gz-dtb"
+         compiled_dtb="arch/arm64/boot/dtb.img"
          compiled_dtbo="arch/arm64/boot/dtbo.img"
-         qcom_dtb="arch/arm64/boot/dts/vendor/qcom"
            
-         if [[ -f ${compiled_image} || -f ${compiled_gz_image} || -f ${compiled_gz_dtb} ]]; then
-              git clone -q ${{ github.event.inputs.ANYKERNEL }} "${{ env.ANYKERNEL }}"
-
-              if [[ -f "${compiled_image}" ]]; then
-                  cp -f "${compiled_image}" "${{ env.ANYKERNEL }}/Image" || true
-                  cp -f "${compiled_image}" "${{ env.OUTPUT_DIR }}/Image" || true
-              elif [[ -f "${compiled_gz_image}" ]]; then
-                  cp -f "${compiled_gz_image}" "${{ env.ANYKERNEL }}/Image.gz" || true
-                  cp -f "${compiled_gz_image}" "${{ env.OUTPUT_DIR }}/Image.gz" || true
-              elif [[ -f "${compiled_gz_dtb}" ]]; then
-                  cp -f "${compiled_gz_dtb}" "${{ env.ANYKERNEL }}/Image.gz-dtb" || true
-                  cp -f "${compiled_gz_dtb}" "${{ env.OUTPUT_DIR }}/Image.gz-dtb" || true
-              fi
-              
-              if [[ -f "${compiled_dtbo}" ]]; then
-                  cp -f "${compiled_dtbo}" "${{ env.ANYKERNEL }}/dtbo.img" || true
-                  cp -f "${compiled_dtbo}" "${{ env.OUTPUT_DIR }}/dtbo.img" || true
-              fi
-              
-              if ls ${qcom_dtb}/*.dtb 1> /dev/null 2>&1; then
-                  cp -f ${qcom_dtb}/*.dtb "${{ env.OUTPUT_DIR }}" || true
-              fi
-
-              cd "${{ env.ANYKERNEL }}"
-              zip -r AnyKernel.zip *
-              mv -- "AnyKernel.zip" "${{ env.ZIP_NAME }}"
-              mv -- "${{ env.ANYKERNEL }}/${{ env.ZIP_NAME }}" "${{ env.OUTPUT_DIR }}/${{ env.ZIP_NAME }}"
-              rm -rf "${{ env.ANYKERNEL }}"
-         else
-              echo "ERROR: Some output is missing!"
-              exit 1
-         fi
-         
-         zip_file=$(find ${{ env.OUTPUT_DIR }} -name '${{ github.event.inputs.KERNEL_NAME }}*.zip' -print -quit)
-         echo "ZIP_NAME=$(basename "$zip_file" .zip)" >> $GITHUB_ENV
-         echo "RELEASE_DATE=$(date +'%B %-d, %Y %H:%M')" >> $GITHUB_ENV
+           zip -r AnyKernel.zip compiled_gz_image compiled_dtb compiled_dtbo
+           mv -- "AnyKernel.zip" "${{ env.ZIP_NAME }}"
+           mv -- "${{ env.ANYKERNEL }}/${{ env.ZIP_NAME }}" "${{ env.OUTPUT_DIR }}/${{ env.ZIP_NAME }}"
+           rm -rf "${{ env.ANYKERNEL }}"
+           zip_file=$(find ${{ env.OUTPUT_DIR }} -name '${{ github.event.inputs.KERNEL_NAME }}*.zip' -print -quit)
+           echo "ZIP_NAME=$(basename "$zip_file" .zip)" >> $GITHUB_ENV
+           echo "RELEASE_DATE=$(date +'%B %-d, %Y %H:%M')" >> $GITHUB_ENV
 
       - name: Upload files to repository releases page
         uses: softprops/action-gh-release@v1
