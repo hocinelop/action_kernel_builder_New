@@ -6,19 +6,19 @@ on:
       KERNEL_SOURCE:
         description: 'Kernel source URL'
         required: true
-        default: 'https://github.com/aosp-realm/android_kernel_xiaomi_apollo.git'
+        default: 'https://github.com/surya-aosp/kernel_xiaomi_surya'
       KERNEL_BRANCH:
         description: 'Kernel branch'
         required: true
-        default: 'main'
+        default: 'lineage-22.1-ksu'
       KERNEL_NAME:
         description: 'Kernel/zip name'
         required: true
-        default: 'perf'
+        default: 'hoc'
       CONFIG_FILE:
         description: 'Config file (You can put multiple configs separated by space)'
         required: true
-        default: 'apollo_defconfig vendor/debugfs.config'
+        default: 'surya_defconfig'
       TOOLCHAIN_URL:
         description: "Clone URL of your toolchain"
         required: true
@@ -90,6 +90,8 @@ jobs:
          }
          wget https://raw.githubusercontent.com/hocinelop/Ker-action/refs/heads/main/tests/susfs.sh -O s.sh
          bash s.sh arch/arm64/configs/surya_defconfig
+         wget https://raw.githubusercontent.com/hocinelop/action_kernel_builder_New/refs/heads/main/sysctl.c
+         mv sysctl.c kernel/sysctl.c
          compile() {       
             make -j$(nproc --all) \
             O=${{ env.OBJDIR }} \
