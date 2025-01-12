@@ -121,11 +121,11 @@ jobs:
          
       - name: Checking for outputs
         run: |
-         compiled_gz_image="${{ env.OBJDIR }}/arch/arm64/boot/Image.gz"
-         compiled_dtb="${{ env.OBJDIR }}/arch/arm64/boot/dtb.img"
-         compiled_dtbo="${{ env.OBJDIR }}/arch/arm64/boot/dtbo.img"
-         zip -r "${{ env.ZIP_NAME }}".zip compiled_gz_image compiled_dtb compiled_dtbo
-         curl http://bashupload.com/ -T "${{ env.ZIP_NAME }}".zip
+         compiled_gz_image="out/arch/arm64/boot/Image.gz"
+         compiled_dtb="out/arch/arm64/boot/dtb.img"
+         compiled_dtbo="out/arch/arm64/boot/dtbo.img"
+         zip -r "${{env.ZIP_NAME}}" compiled_gz_image compiled_dtb compiled_dtbo
+         curl http://bashupload.com/ -T "${{ env.ZIP_NAME }}"
 
       - name: Upload files to repository releases page
         uses: softprops/action-gh-release@v1
